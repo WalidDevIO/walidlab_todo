@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const path = require('path');
 const axios = require('axios');
 const cron = require('node-cron');
 
@@ -110,6 +109,10 @@ const sendTelegramNotification = async () => {
       chat_id: process.env.TELEGRAM_CHAT_ID,
       text: message,
       parse_mode: 'Markdown'
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
 
     console.log('Telegram notification sent successfully');
@@ -119,7 +122,7 @@ const sendTelegramNotification = async () => {
 };
 
 // Cron job - runs every day at 9 AM
-cron.schedule('0 9 * * *', () => {
+cron.schedule(process.env.CRON_SCHEDULE || '0 9 * * *', () => {
   console.log('Running daily todo reminder...');
   sendTelegramNotification();
 });
