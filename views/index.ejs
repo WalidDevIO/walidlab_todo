@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .add-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .add-form input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .add-form button {
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .add-form button:hover {
+            background-color: #0056b3;
+        }
+        .todo-list {
+            list-style: none;
+            padding: 0;
+        }
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+        }
+        .todo-item.completed {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+            opacity: 0.7;
+        }
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+        .todo-checkbox {
+            margin-right: 15px;
+            transform: scale(1.5);
+        }
+        .todo-text {
+            flex: 1;
+            font-size: 16px;
+        }
+        .todo-date {
+            font-size: 12px;
+            color: #6c757d;
+            margin-left: 10px;
+        }
+        .stats {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 6px;
+        }
+        .notify-btn {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .notify-btn:hover {
+            background-color: #006699;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Todo App</h1>
+
+        <form class="add-form" action="/add" method="POST">
+            <input type="text" name="text" placeholder="Ajouter une nouvelle tâche..." required>
+            <button type="submit">Ajouter</button>
+        </form>
+
+        <ul class="todo-list">
+            <% todos.forEach(todo => { %>
+                <li class="todo-item <%= todo.completed ? 'completed' : '' %>">
+                    <form action="/toggle/<%= todo._id %>" method="POST" style="display: contents;">
+                        <input type="checkbox" class="todo-checkbox" <%= todo.completed ? 'checked' : '' %>
+                               onchange="this.form.submit()">
+                    </form>
+                    <span class="todo-text"><%= todo.text %></span>
+                    <span class="todo-date">
+                        <%= new Date(todo.createdAt).toLocaleDateString('fr-FR') %>
+                    </span>
+                </li>
+            <% }); %>
+        </ul>
+
+        <% if (todos.length === 0) { %>
+            <p style="text-align: center; color: #6c757d; font-style: italic;">
+                Aucune tâche pour le moment. Ajoutez-en une !
+            </p>
+        <% } %>
+
+        <div class="stats">
+            <p><strong>Total:</strong> <%= todos.length %> tâche(s)</p>
+            <p><strong>Terminées:</strong> <%= todos.filter(t => t.completed).length %></p>
+            <p><strong>En attente:</strong> <%= todos.filter(t => !t.completed).length %></p>
+
+            <form action="/notify" method="POST" style="display: inline;">
+                <button type="submit" class="notify-btn">📱 Envoyer notification Telegram</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function updateStats() {
+            const todos = <%-JSON.stringify(todos)%>;
+            console.log('Current todos:', todos);
+        }
+        updateStats();
+    </script>
+</body>
+</html>
