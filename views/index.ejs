@@ -133,6 +133,13 @@
             </p>
         <% } %>
 
+        <div class="updateCron">
+            <form action="/update-cron" method="POST" style="text-align: center; margin-top: 20px;">
+                <input type="text" name="cronExpression" placeholder="Expression cron (ex: '0 9 * * *')" required>
+                <button type="submit" class="notify-btn">🔄 Mettre à jour la tâche cron</button>
+            </form>
+        </div>
+
         <div class="stats">
             <p><strong>Total:</strong> <%= todos.length %> tâche(s)</p>
             <p><strong>Terminées:</strong> <%= todos.filter(t => t.completed).length %></p>

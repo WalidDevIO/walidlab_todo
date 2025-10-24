@@ -9,6 +9,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+let cronTask = null;
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -92,6 +94,25 @@ app.get('/admin', async (req, res) => {
   }
 });
 
+app.post('/update-cron', (req, res) => {
+  const { cronExpression } = req.body;
+  if (!cronExpression) {
+    return res.status(400).json({ error: 'Cron schedule is required' });
+  }
+  try {
+    // Validate and create cron Scheduler
+    const tmpCron = cron.schedule(cronExpression, () => {
+      console.log('Running scheduled todo reminder...');
+      sendTelegramNotification();
+    });
+    if (cronTask) cronTask.stop();
+    cronTask = tmpCron;
+    res.json({ message: 'Cron schedule updated', cronExpression });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error ' + error.message });
+  }
+});
+
 // Telegram notification function
 const sendTelegramNotification = async () => {
   try {
@@ -121,8 +142,8 @@ const sendTelegramNotification = async () => {
   }
 };
 
-// Cron job - runs every day at 9 AM
-cron.schedule(process.env.CRON_SCHEDULE || '0 9 * * *', () => {
+//Set default cron job to run daily at 9 AM or as per environment variable
+cronTask = cron.schedule(process.env.CRON_SCHEDULE || '0 9 * * *', () => {
   console.log('Running daily todo reminder...');
   sendTelegramNotification();
 });
